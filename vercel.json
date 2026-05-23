@@ -3,10 +3,9 @@
   "buildCommand": "pnpm build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/((?!api/|assets/|favicon\\.svg).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
