@@ -128,9 +128,14 @@ docs/
 ### 图片 CDN 代理
 
 智谱 `/images/generations` 返回的 URL 落在 UCloud 对象存储（`*.ufileos.com`），**不返回 CORS 头**，浏览器无法直接 fetch 拿到 Blob。
-项目在 [vite-plugins/image-proxy.ts](vite-plugins/image-proxy.ts) 实现了一个 dev/preview 服务器中间件，把图片请求通过 `/api/img?url=...` 代理一次并附加 `Access-Control-Allow-Origin: *`。
+项目提供两份等价实现：
 
-**部署到纯静态站时这个代理不可用**，需要单独提供等价的 serverless 函数（Vercel Edge / Cloudflare Worker / 任意 Node 后端）路由到相同路径。
+- 本地开发 / 预览：[vite-plugins/image-proxy.ts](vite-plugins/image-proxy.ts) 注入 dev / preview 服务器中间件
+- 生产部署：[api/img.ts](api/img.ts) Vercel Edge Function
+
+两者都监听同一路径 `/api/img?url=...`，把图片从智谱 CDN 拉回并附加 `Access-Control-Allow-Origin: *`。客户端始终通过这个路径取图，不需要关心环境差异。
+
+部署到 **其它静态托管**（如 Cloudflare Pages / Netlify）时，需要把 `api/img.ts` 的逻辑搬到对应的 serverless / Edge runtime（Cloudflare Worker / Netlify Edge Function），保持路径仍为 `/api/img`。
 
 ### 免费模型并发限制
 
@@ -168,6 +173,17 @@ pnpm preview     # 本机预览构建产物（含图片代理）
 ```
 
 产物体积（gzipped）：约 130 KB JS / 5 KB CSS。
+
+### 部署到 Vercel
+
+直接在 Vercel 导入这个 GitHub 仓库即可，无需手动配置：
+
+- 框架预设：Vercel 自动识别为 Vite
+- Build Command：`pnpm build`
+- Output Directory：`dist`
+- Edge Function：`api/img.ts` 自动挂在 `/api/img`
+
+部署完成后访问站点，在「设置」里填入智谱 API Key 即可使用。
 
 ---
 
