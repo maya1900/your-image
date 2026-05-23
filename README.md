@@ -30,7 +30,7 @@
 
 | 创作页 | 画廊 | 设置 |
 |---|---|---|
-| ![创作](docs/screenshots/create.png) | ![画廊](docs/screenshots/gallery.png) | ![设置](docs/screenshots/settings.png) |
+| ![创作](docs/screenshots/create.jpg) | ![画廊](docs/screenshots/gallery.jpg) | ![设置](docs/screenshots/settings.jpg) |
 
 **创作页布局**（参考）：
 
