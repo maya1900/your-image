@@ -3,18 +3,50 @@
 > 基于智谱 CogView / GLM 系列的本地 AI 文生图工作台。
 > 单页应用 · 自带 API Key · 作品仅存本机 · 不登录、不上云。
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-8B5CF6.svg)](LICENSE)
+[![Vite](https://img.shields.io/badge/Vite-6-646cff.svg)](https://vitejs.dev)
+[![React](https://img.shields.io/badge/React-18-61dafb.svg)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6.svg)](https://www.typescriptlang.org)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind-3-38bdf8.svg)](https://tailwindcss.com)
+
 ---
 
 ## ✨ 特性
 
-- **文生图**：支持 CogView-3-Flash（免费）、CogView-4、CogView-4-250304、GLM-Image
+- **文生图**：支持 CogView-3-Flash（免费）/ CogView-4 / CogView-4-250304 / GLM-Image
 - **✨ 优化提示词**：一键让 GLM-4-Flash 把简短描述扩写成详尽的视觉化 prompt
 - **风格预设**：12 种内置风格（国风水墨 / 动漫 / 赛博朋克 / 3D Pixar / 油画 / 像素艺术 / 写实摄影 ...）可叠加
 - **Prompt 历史**：自动记录最近 50 条，chip 一键复用
 - **批量生成**：每次 1 / 2 / 4 张并发（免费模型自动串行避免 429）
-- **本地画廊**：IndexedDB 存储 Blob，浏览/下载/收藏/再生成
-- **Lightbox**：键盘 ←→ 翻图、Esc 关闭
+- **本地画廊**：IndexedDB 存储 Blob，浏览 / 下载 / 收藏 / 再生成
+- **Lightbox**：键盘 ← → 翻图、Esc 关闭
 - **零后端**：API Key 仅 localStorage，请求直连智谱开放平台
+
+---
+
+## 🖼️ 界面预览
+
+> 截图占位：把你跑起来的页面截图放到 `docs/screenshots/` 目录下并以下面的文件名命名即可在 README 中自动展示。
+
+| 创作页 | 画廊 | 设置 |
+|---|---|---|
+| ![创作](docs/screenshots/create.png) | ![画廊](docs/screenshots/gallery.png) | ![设置](docs/screenshots/settings.png) |
+
+**创作页布局**（参考）：
+
+```
+┌──────┬─────────────────────────┬──────────────────────────────────┐
+│ Side │  ParamsPanel  360px     │  ResultsArea (flex 1)            │
+│ bar  │                         │                                  │
+│      │  [Prompt + ✨ 优化]     │   ┌─────┬─────┐                  │
+│  ✦   │  [最近使用 chip]        │   │ img │ img │  网格 1 / 2×2    │
+│  ▥   │  [风格预设 chip grid]   │   ├─────┼─────┤                  │
+│  ⚙   │  [尺寸 · 模型 · 数量]   │   │ img │ img │                  │
+│      │                         │   └─────┴─────┘                  │
+│      │  ───────────────────    │                                  │
+│      │  [⚡ 生成图像]          │   ⌘ + Enter 快速生成             │
+└──────┴─────────────────────────┴──────────────────────────────────┘
+```
 
 ---
 
@@ -75,7 +107,8 @@ docs/
 ├── PRD.md                # 产品需求
 ├── ARCHITECTURE.md       # 技术架构
 ├── DEV_PLAN.md           # 开发计划
-└── DESIGN.md             # 视觉设计系统
+├── DESIGN.md             # 视觉设计系统
+└── screenshots/          # 界面截图（放图就行，README 自动引用）
 ```
 
 ---
@@ -95,7 +128,7 @@ docs/
 ### 图片 CDN 代理
 
 智谱 `/images/generations` 返回的 URL 落在 UCloud 对象存储（`*.ufileos.com`），**不返回 CORS 头**，浏览器无法直接 fetch 拿到 Blob。
-项目在 `vite-plugins/image-proxy.ts` 实现了一个 dev/preview 服务器中间件，把图片请求通过 `/api/img?url=...` 代理一次并附加 `Access-Control-Allow-Origin: *`。
+项目在 [vite-plugins/image-proxy.ts](vite-plugins/image-proxy.ts) 实现了一个 dev/preview 服务器中间件，把图片请求通过 `/api/img?url=...` 代理一次并附加 `Access-Control-Allow-Origin: *`。
 
 **部署到纯静态站时这个代理不可用**，需要单独提供等价的 serverless 函数（Vercel Edge / Cloudflare Worker / 任意 Node 后端）路由到相同路径。
 
@@ -117,6 +150,16 @@ docs/
 
 ---
 
+## ⌨️ 快捷键
+
+| 上下文 | 快捷键 | 作用 |
+|---|---|---|
+| Prompt 框内 | `⌘ / Ctrl + Enter` | 提交生成 |
+| Lightbox | `←` / `→` | 上一张 / 下一张 |
+| Lightbox | `Esc` | 关闭 |
+
+---
+
 ## 📦 构建
 
 ```bash
@@ -130,12 +173,34 @@ pnpm preview     # 本机预览构建产物（含图片代理）
 
 ## 🛣️ Roadmap
 
-- v1（当前）：文生图 + 优化提示词
-- v2（待智谱开放原生 API 后跟进）：图生图、AI 抠图、Inpainting、Outpainting、指令式编辑
-- v2+：多模型对比、自定义风格预设、视频生成（CogVideoX）
+- **v1（当前）**：文生图 + 优化提示词 + 风格预设 + 本地画廊
+- **v2（待智谱开放原生 API 后跟进）**：图生图 / AI 抠图 / Inpainting / Outpainting / 指令式编辑
+- **v2+**：多模型对比 · 自定义风格预设 · 视频生成（CogVideoX）
+
+---
+
+## 📂 文档
+
+完整设计文档位于 [`docs/`](docs/) 目录：
+
+- [产品需求 PRD](docs/PRD.md)
+- [技术架构](docs/ARCHITECTURE.md)
+- [开发计划](docs/DEV_PLAN.md)
+- [视觉设计系统](docs/DESIGN.md)
+
+---
+
+## 🤝 贡献
+
+欢迎 issue 与 PR。提交前请保证：
+
+```bash
+node_modules/.bin/tsc --noEmit   # 类型零错误
+pnpm build                       # 构建通过
+```
 
 ---
 
 ## 📄 License
 
-私有项目 · 仅供个人创作使用。
+[MIT](LICENSE) © 2026 maya1900
