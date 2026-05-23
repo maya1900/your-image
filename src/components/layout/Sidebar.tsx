@@ -1,8 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Images, Sparkles, Settings as SettingsIcon, X } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { AboutDialog } from './AboutDialog';
+import pkg from '../../../package.json';
 
 const items = [
   { to: '/create', label: '创作', icon: Sparkles },
@@ -17,7 +19,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ open, onClose }: SidebarProps) {
-  // Esc 关闭移动抽屉
+  const [aboutOpen, setAboutOpen] = useState(false);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -27,7 +30,6 @@ export function Sidebar({ open, onClose }: SidebarProps) {
     return () => document.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
-  // 抽屉打开时锁背景滚动
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -41,7 +43,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
     <>
       {/* 桌面端：左侧常驻 */}
       <aside className="hidden w-60 shrink-0 flex-col border-r border-hairline bg-carbon md:flex">
-        <SidebarContent />
+        <SidebarContent onAboutClick={() => setAboutOpen(true)} />
       </aside>
 
       {/* 移动端：抽屉 + 遮罩 */}
@@ -75,16 +77,22 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               >
                 <X className="h-4 w-4" />
               </button>
-              <SidebarContent />
+              <SidebarContent onAboutClick={() => setAboutOpen(true)} />
             </motion.aside>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} />
     </>
   );
 }
 
-function SidebarContent() {
+interface SidebarContentProps {
+  onAboutClick: () => void;
+}
+
+function SidebarContent({ onAboutClick }: SidebarContentProps) {
   return (
     <>
       <div className="flex h-14 items-center gap-2 px-5">
@@ -124,9 +132,15 @@ function SidebarContent() {
         ))}
       </nav>
 
-      <div className="mt-auto px-5 pb-4 text-caption text-ink-faded">
-        <p>Key 与作品仅本机存储 ·</p>
-        <p>v0.1.0</p>
+      <div className="mt-auto px-5 pb-4">
+        <p className="text-caption text-ink-faded">Key 与作品仅本机存储</p>
+        <button
+          type="button"
+          onClick={onAboutClick}
+          className="mt-1 inline-flex h-6 items-center gap-1 rounded-xs text-caption text-aurora-violet/80 transition-colors hover:text-aurora-violet"
+        >
+          关于 · v{pkg.version}
+        </button>
       </div>
     </>
   );
