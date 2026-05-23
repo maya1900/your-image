@@ -128,14 +128,16 @@ docs/
 ### 图片 CDN 代理
 
 智谱 `/images/generations` 返回的 URL 落在 UCloud 对象存储（`*.ufileos.com`），**不返回 CORS 头**，浏览器无法直接 fetch 拿到 Blob。
-项目提供两份等价实现：
+项目提供四份等价的代理实现，全部监听同一路径 `/api/img?url=...`：
 
-- 本地开发 / 预览：[vite-plugins/image-proxy.ts](vite-plugins/image-proxy.ts) 注入 dev / preview 服务器中间件
-- 生产部署：[api/img.ts](api/img.ts) Vercel Edge Function
+| 环境 | 文件 |
+|---|---|
+| 本地 dev / preview | [vite-plugins/image-proxy.ts](vite-plugins/image-proxy.ts) |
+| Vercel | [api/img.ts](api/img.ts)（Edge Function） |
+| Docker / 自托管 Node | [server/index.mjs](server/index.mjs)（Hono） |
+| Cloudflare Pages | [functions/api/img.ts](functions/api/img.ts)（Pages Function） |
 
-两者都监听同一路径 `/api/img?url=...`，把图片从智谱 CDN 拉回并附加 `Access-Control-Allow-Origin: *`。客户端始终通过这个路径取图，不需要关心环境差异。
-
-部署到 **其它静态托管**（如 Cloudflare Pages / Netlify）时，需要把 `api/img.ts` 的逻辑搬到对应的 serverless / Edge runtime（Cloudflare Worker / Netlify Edge Function），保持路径仍为 `/api/img`。
+四者都把图片从智谱 CDN 拉回并附加 `Access-Control-Allow-Origin: *`，仅放行 `*.bigmodel.cn` / `*.ufileos.com` 两族域名。前端不需要关心环境差异。
 
 ### 免费模型并发限制
 
@@ -170,20 +172,76 @@ docs/
 ```bash
 pnpm build       # 产物输出到 dist/
 pnpm preview     # 本机预览构建产物（含图片代理）
+pnpm start       # 用 Node 服务运行 dist/（含图片代理，监听 :3000）
 ```
 
 产物体积（gzipped）：约 130 KB JS / 5 KB CSS。
 
-### 部署到 Vercel
+---
 
-直接在 Vercel 导入这个 GitHub 仓库即可，无需手动配置：
+## 🚢 部署
 
-- 框架预设：Vercel 自动识别为 Vite
+> 不论部署到哪里，都必须保证 `/api/img` 这个路径由对应环境的代理实现处理，否则浏览器 fetch 智谱 CDN 会因 CORS 失败。本项目同时提供 Vercel Edge / Node / Cloudflare 三套等价实现。
+
+### Vercel（推荐 · 零配置）
+
+直接在 Vercel 导入这个 GitHub 仓库：
+
+- 框架预设：自动识别为 Vite
 - Build Command：`pnpm build`
 - Output Directory：`dist`
-- Edge Function：`api/img.ts` 自动挂在 `/api/img`
+- Edge Function：[`api/img.ts`](api/img.ts) 自动挂在 `/api/img`
 
 部署完成后访问站点，在「设置」里填入智谱 API Key 即可使用。
+
+### Docker（自托管）
+
+仓库自带 Dockerfile + docker-compose.yml，使用 Node 22 + Hono 提供静态资源与代理。
+
+```bash
+# 一键起服务（端口 3000）
+docker compose up -d --build
+
+# 自定义端口
+YOUR_IMAGE_PORT=8080 docker compose up -d --build
+
+# 关闭
+docker compose down
+```
+
+或不用 compose：
+
+```bash
+docker build -t your-image:latest .
+docker run -d --name your-image -p 3000:3000 your-image:latest
+```
+
+镜像采用三段式多阶段构建，运行时基于 `node:22-alpine`，约 **120 MB**。
+服务运行在 [`server/index.mjs`](server/index.mjs)，无 root 用户、含健康检查。
+
+### Cloudflare Pages（边缘 · 全球加速）
+
+把仓库连到 Cloudflare Pages，Build 设置如下：
+
+| 项 | 值 |
+|---|---|
+| Build command | `pnpm build` |
+| Build output directory | `dist` |
+| Node version | `22` |
+
+[`functions/api/img.ts`](functions/api/img.ts) 会被自动识别为 Pages Function，挂在 `/api/img` 路径下。
+
+### 其它静态托管（Netlify / S3 / 自建 Nginx）
+
+把 `dist/` 上传作为静态站，**额外**需要一个能处理 `/api/img?url=...` 的代理：
+
+- Netlify：把 [`api/img.ts`](api/img.ts) 适配到 `netlify/edge-functions/img.ts`
+- AWS：S3 + CloudFront + Lambda@Edge
+- Nginx：使用 njs 或 OpenResty 转写 query 参数后 `proxy_pass`
+
+只要响应路径仍是 `/api/img`、返回 `Access-Control-Allow-Origin: *`，前端不用改一行代码。
+
+---
 
 ---
 

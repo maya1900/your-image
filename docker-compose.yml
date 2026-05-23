@@ -1,0 +1,13 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: your-image:latest
+    container_name: your-image
+    restart: unless-stopped
+    ports:
+      - "${YOUR_IMAGE_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
