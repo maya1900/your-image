@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Images, Sparkles, Settings as SettingsIcon } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Images, Sparkles, Settings as SettingsIcon, X } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
 const items = [
@@ -8,9 +10,83 @@ const items = [
   { to: '/settings', label: '设置', icon: SettingsIcon },
 ] as const;
 
-export function Sidebar() {
+interface SidebarProps {
+  /** 移动端抽屉是否展开（桌面端忽略） */
+  open: boolean;
+  onClose: () => void;
+}
+
+export function Sidebar({ open, onClose }: SidebarProps) {
+  // Esc 关闭移动抽屉
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
+  // 抽屉打开时锁背景滚动
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
   return (
-    <aside className="hidden w-60 shrink-0 flex-col border-r border-hairline bg-carbon md:flex">
+    <>
+      {/* 桌面端：左侧常驻 */}
+      <aside className="hidden w-60 shrink-0 flex-col border-r border-hairline bg-carbon md:flex">
+        <SidebarContent />
+      </aside>
+
+      {/* 移动端：抽屉 + 遮罩 */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-30 bg-void/70 backdrop-blur-sm md:hidden"
+            onClick={onClose}
+            role="presentation"
+          >
+            <motion.aside
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              className="relative flex h-full w-64 max-w-[80vw] flex-col border-r border-hairline bg-carbon"
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-label="主导航"
+              aria-modal="true"
+            >
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="关闭导航"
+                className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-sm text-ink-mist transition-colors hover:bg-slate-raised hover:text-ink"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              <SidebarContent />
+            </motion.aside>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+function SidebarContent() {
+  return (
+    <>
       <div className="flex h-14 items-center gap-2 px-5">
         <div className="flex h-7 w-7 items-center justify-center rounded-md bg-aurora-gradient">
           <span className="text-[14px] font-bold text-void">Y</span>
@@ -52,6 +128,6 @@ export function Sidebar() {
         <p>Key 与作品仅本机存储 ·</p>
         <p>v0.1.0</p>
       </div>
-    </aside>
+    </>
   );
 }
