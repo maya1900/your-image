@@ -8,6 +8,8 @@ export interface CogViewRequest {
   prompt: string;
   size?: string;
   quality?: Quality;
+  /** 是否在生成图片上叠加水印。设为 false 即可去除水印（付费模型生效，免费 cogview-3-flash 可能强制保留）。 */
+  watermark?: boolean;
   user_id?: string;
 }
 

@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select, type SelectOption } from '@/components/ui/Select';
+import { Switch } from '@/components/ui/Switch';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { testConnection } from '@/lib/api/glm-chat';
 import { ZhipuError } from '@/lib/api/zhipu';
@@ -43,10 +44,12 @@ export function SettingsPage() {
   const apiKey = useSettings((s) => s.apiKey);
   const defaultImageModel = useSettings((s) => s.defaultImageModel);
   const defaultChatModel = useSettings((s) => s.defaultChatModel);
+  const removeWatermark = useSettings((s) => s.removeWatermark);
   const lastTest = useSettings((s) => s.lastTest);
   const setApiKey = useSettings((s) => s.setApiKey);
   const setImageModel = useSettings((s) => s.setDefaultImageModel);
   const setChatModel = useSettings((s) => s.setDefaultChatModel);
+  const setRemoveWatermark = useSettings((s) => s.setRemoveWatermark);
   const setLastTest = useSettings((s) => s.setLastTest);
   const clearAll = useSettings((s) => s.clearAll);
   const clearGallery = useGallery((s) => s.clearAll);
@@ -265,6 +268,24 @@ export function SettingsPage() {
             onValueChange={(v) => setChatModel(v as ChatModel)}
             options={CHAT_MODELS}
           />
+        </section>
+
+        {/* 水印 */}
+        <section className="rounded-lg border border-hairline bg-slate-card p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-h3 text-ink">去除水印</h2>
+              <p className="mt-1 text-body-sm text-ink-mist">
+                生成图片时请求智谱不添加水印。付费模型 (CogView-4) 完整生效；
+                免费的 CogView-3-Flash 由智谱服务端决定，可能仍强制保留。
+              </p>
+            </div>
+            <Switch
+              checked={removeWatermark}
+              onChange={setRemoveWatermark}
+              aria-label="去除水印"
+            />
+          </div>
         </section>
 
         {/* 数据管理 */}

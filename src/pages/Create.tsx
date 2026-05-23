@@ -49,6 +49,7 @@ const MAX_PARALLEL: Record<ImageModel, number> = {
 export function CreatePage() {
   const apiKey = useSettings((s) => s.apiKey);
   const defaultImageModel = useSettings((s) => s.defaultImageModel);
+  const removeWatermark = useSettings((s) => s.removeWatermark);
 
   const tasks = useTasks((s) => s.current);
   const resetTasks = useTasks((s) => s.reset);
@@ -138,7 +139,7 @@ export function CreatePage() {
     setSubmitting(true);
     const ids = Array.from({ length: form.count }, () => uuid());
     resetTasks(ids);
-    const req = buildRequest(form, selectedPresets);
+    const req = buildRequest(form, selectedPresets, removeWatermark);
     addHistory(form.prompt);
     const limit = MAX_PARALLEL[form.model] ?? 1;
     try {
@@ -149,7 +150,7 @@ export function CreatePage() {
   };
 
   const handleRetry = async (taskId: string) => {
-    const req = buildRequest(form, selectedPresets);
+    const req = buildRequest(form, selectedPresets, removeWatermark);
     useTasks.setState((s) => ({
       current: s.current.map((t) =>
         t.id === taskId
@@ -319,12 +320,17 @@ export function CreatePage() {
   );
 }
 
-function buildRequest(form: FormState, presetIds: string[]) {
+function buildRequest(
+  form: FormState,
+  presetIds: string[],
+  removeWatermark: boolean
+) {
   const includeQuality = HD_MODELS.includes(form.model);
   return {
     model: form.model,
     prompt: applyPresets(form.prompt, presetIds),
     size: form.size,
     quality: includeQuality ? form.quality : undefined,
+    watermark: removeWatermark ? false : undefined,
   };
 }
