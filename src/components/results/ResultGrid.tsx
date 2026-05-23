@@ -1,4 +1,5 @@
 import { ImageOff, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { ResultCard } from './ResultCard';
 import { cn } from '@/lib/utils/cn';
 import type { TaskItem } from '@/lib/store/tasks';
@@ -75,7 +76,13 @@ export function EmptyKeyHint({ className }: EmptyKeyHintProps) {
       </div>
       <h3 className="text-h3 text-ink">还没有配置 API Key</h3>
       <p className="mt-2 text-body-sm text-ink-mist">
-        前往 <a href="/settings" className="text-aurora-violet underline-offset-2 hover:underline">设置页</a>{' '}
+        前往{' '}
+        <Link
+          to="/settings"
+          className="text-aurora-violet underline-offset-2 hover:underline"
+        >
+          设置页
+        </Link>{' '}
         填入智谱开放平台的 API Key 即可开始创作。
       </p>
     </div>
