@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    background: #0a0a0f;
+    color: #f4f4f7;
+    font-family:
+      'Inter',
+      'PingFang SC',
+      'Source Han Sans CN',
+      'Microsoft YaHei',
+      system-ui,
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  ::selection {
+    background: rgba(139, 92, 246, 0.35);
+    color: #f4f4f7;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1f1f2a;
+    border-radius: 8px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2a2a36;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-sm bg-aurora-gradient px-5 text-body font-semibold text-ink shadow-card transition-transform duration-150 hover:scale-[1.01] active:translate-y-px disabled:cursor-not-allowed disabled:bg-none disabled:bg-[#27272F] disabled:text-ink-disabled;
+  }
+  .btn-secondary {
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-sm border border-hairline bg-transparent px-5 text-body text-ink-mist transition-colors hover:border-[#28283A] hover:bg-slate-raised hover:text-ink;
+  }
+  .btn-ghost {
+    @apply inline-flex h-9 items-center justify-center gap-2 rounded-sm bg-transparent px-3 text-body text-ink-mist transition-colors hover:bg-aurora-soft hover:text-ink;
+  }
+  .btn-danger {
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-sm bg-transparent px-5 text-body text-status-err transition-colors hover:bg-status-err/10;
+  }
+
+  .input-base {
+    @apply w-full rounded-sm border border-hairline bg-carbon px-3 py-2 text-body text-ink placeholder:text-ink-faded transition-colors hover:border-[#2A2A36] focus:border-aurora-violet focus:outline-none focus:shadow-focus;
+  }
+
+  .card-base {
+    @apply rounded-lg border border-hairline bg-slate-card p-4;
+  }
+
+  .skeleton {
+    background:
+      linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.08), transparent) #1a1a24;
+    background-size: 200% 100%;
+    animation: sheen 2s linear infinite;
+  }
+}
