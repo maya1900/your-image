@@ -261,6 +261,7 @@ docker run -d --name your-image -p 3000:3000 your-image:latest
 - [技术架构](docs/ARCHITECTURE.md)
 - [开发计划](docs/DEV_PLAN.md)
 - [视觉设计系统](docs/DESIGN.md)
+- [更新日志 CHANGELOG](CHANGELOG.md)
 
 ---
 
